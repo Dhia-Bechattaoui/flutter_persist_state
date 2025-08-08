@@ -1,0 +1,21 @@
+name: flutter_persist_state_example
+description: Example app demonstrating flutter_persist_state usage
+version: 0.0.3+3
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_persist_state:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
