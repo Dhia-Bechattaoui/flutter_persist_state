@@ -1,6 +1,7 @@
 name: flutter_persist_state_example
 description: Example app demonstrating flutter_persist_state usage
 version: 0.0.3+3
+publish_to: none
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -11,6 +12,8 @@ dependencies:
     sdk: flutter
   flutter_persist_state:
     path: ../
+    # Note: This path dependency is only for development.
+    # In production, this would be a published version.
 
 dev_dependencies:
   flutter_test:

@@ -47,8 +47,14 @@ class PersistState<T> {
     try {
       final storedValue = await _storage!.load(_key);
       if (storedValue != null) {
-        _value = storedValue as T;
-        _controller.add(_value);
+        // Safe type checking before assignment
+        if (storedValue is T) {
+          _value = storedValue;
+          _controller.add(_value);
+        } else {
+          // Type mismatch, use default value
+          _value = _defaultValue;
+        }
       }
     } catch (e) {
       // If loading fails, use default value
@@ -103,8 +109,14 @@ class PersistState<T> {
     try {
       final storedValue = await _storage!.load(_key);
       if (storedValue != null) {
-        _value = storedValue as T;
-        _controller.add(_value);
+        // Safe type checking before assignment
+        if (storedValue is T) {
+          _value = storedValue;
+          _controller.add(_value);
+        } else {
+          // Type mismatch, use default value
+          _value = _defaultValue;
+        }
       }
     } catch (e) {
       // ignore: avoid_print

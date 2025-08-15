@@ -270,6 +270,22 @@ void main() {
       // Should not throw when trying to use disposed state
       expect(() => state.value, returnsNormally);
     });
+
+    test('should handle type mismatch gracefully', () async {
+      // Store a string value when expecting an int
+      await mockStorage.save('test', 'not_an_int');
+
+      final state = PersistState<int>(
+        key: 'test',
+        defaultValue: 42,
+        storage: mockStorage,
+      );
+
+      await state.initialize();
+
+      // Should use default value when type mismatch occurs
+      expect(state.value, equals(42));
+    });
   });
 
   group('PersistStateExtension', () {
