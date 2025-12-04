@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.1.0] - 2024-12-04
+
+### Added
+- Comprehensive example app demonstrating all package features
+- Tab-based navigation in example app for better organization
+- Detailed test instructions and descriptions for each feature
+- Interactive demos for all PersistStateMixin methods
+- Interactive demos for all PersistState API methods
+- Storage adapters comparison demo
+- Configuration options demo (autoPersist, debounceTime)
+- Documentation for FileStorageAdapter methods
+- Library-level documentation
+
+### Changed
+- Improved example app UI with top navigation tabs instead of side navigation
+- Enhanced example app with clear descriptions and test expectations for each feature
+- Replaced `print` statements with `debugPrint` for better Flutter integration
+- Improved file I/O operations using `compute()` for better performance
+- Changed `dynamic` type annotations to `Object?` for better type safety
+- Enhanced code quality to achieve 160/160 pana score
+
+### Fixed
+- Fixed all linter warnings and info issues (183 → 0 issues)
+- Fixed formatting issues across all files
+- Fixed parameter ordering in constructors
+- Fixed discarded futures warnings
+- Fixed type annotation issues
+- Fixed file I/O async operations to use isolates properly
+
 ## [0.0.3] - 2024-01-01
 
 ### Added
@@ -54,3 +85,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple storage adapters for different use cases
 - Easy integration with Flutter widgets
 - Proper resource disposal and cleanup
+
+[Unreleased]: https://github.com/Dhia-Bechattaoui/flutter_persist_state/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Dhia-Bechattaoui/flutter_persist_state/compare/v0.0.3...v0.1.0
+[0.0.3]: https://github.com/Dhia-Bechattaoui/flutter_persist_state/compare/v0.0.2...v0.0.3
+[0.0.2]: https://github.com/Dhia-Bechattaoui/flutter_persist_state/compare/v0.0.1...v0.0.2
+[0.0.1]: https://github.com/Dhia-Bechattaoui/flutter_persist_state/releases/tag/v0.0.1

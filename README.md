@@ -1,6 +1,12 @@
 # Flutter Persist State
 
+[![pub package](https://img.shields.io/pub/v/flutter_persist_state.svg)](https://pub.dev/packages/flutter_persist_state)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Pana Score](https://img.shields.io/badge/pana-160%2F160-brightgreen)](https://pub.dev/packages/flutter_persist_state/score)
+
 A lightweight state management solution for Flutter with automatic persistence to local storage.
+
+<img src="assets/example.gif" width="300" alt="Example Demo" />
 
 ## Features
 
@@ -11,6 +17,9 @@ A lightweight state management solution for Flutter with automatic persistence t
 - 🔌 **Flexible Storage**: Multiple storage adapters (SharedPreferences, File-based)
 - 🎨 **Widget Integration**: Easy integration with Flutter widgets
 - 🧹 **Automatic Cleanup**: Proper resource disposal
+- 🌐 **Multi-Platform**: Supports iOS, Android, Web, Windows, macOS, and Linux
+- ⚡ **High Performance**: Optimized file I/O using isolates
+- 📊 **Production Ready**: 160/160 pana score with zero linter issues
 
 ## Installation
 
@@ -18,7 +27,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_persist_state: ^0.0.3
+  flutter_persist_state: ^0.1.0
 ```
 
 ## Quick Start
@@ -349,6 +358,17 @@ final state = PersistState<String>(
 );
 ```
 
+## Platform Support
+
+This package supports all Flutter platforms:
+
+- ✅ **iOS**
+- ✅ **Android**
+- ✅ **Web** (including WASM)
+- ✅ **Windows**
+- ✅ **macOS**
+- ✅ **Linux**
+
 ## Best Practices
 
 1. **Use descriptive keys**: Use meaningful keys for your persistent states
@@ -357,10 +377,32 @@ final state = PersistState<String>(
 4. **Choose appropriate storage**: Use SharedPreferences for small data, FileStorage for large data
 5. **Debounce wisely**: Set appropriate debounce times based on your use case
 
+## Documentation
+
+- [API Documentation](https://pub.dev/documentation/flutter_persist_state/latest/)
+- [Example App](example/)
+- [Changelog](CHANGELOG.md)
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+If you find this package useful, please consider:
+
+- ⭐ Starring the repository
+- 🐛 Reporting bugs
+- 💡 Suggesting new features
+- 📖 Improving documentation
+- 💰 [Sponsoring the project](https://github.com/sponsors/Dhia-Bechattaoui)

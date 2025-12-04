@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_persist_state/src/persist_state.dart';
-import 'package:flutter_persist_state/src/storage_adapters.dart';
+
+import 'persist_state.dart';
+import 'storage_adapters.dart';
 
 /// Mixin for StatefulWidget to easily manage persistent state
 mixin PersistStateMixin<T extends StatefulWidget> on State<T> {
@@ -15,11 +18,11 @@ mixin PersistStateMixin<T extends StatefulWidget> on State<T> {
   /// [autoPersist] - Whether to automatically persist changes
   /// [debounceTime] - Debounce time for auto-persistence
   PersistState<R> getPersistState<R>({
-    required String key,
-    required R defaultValue,
-    StorageAdapter? storage,
-    bool autoPersist = true,
-    Duration? debounceTime,
+    required final String key,
+    required final R defaultValue,
+    final StorageAdapter? storage,
+    final bool autoPersist = true,
+    final Duration? debounceTime,
   }) {
     if (!_persistStates.containsKey(key)) {
       final persistState = PersistState<R>(
@@ -39,12 +42,14 @@ mixin PersistStateMixin<T extends StatefulWidget> on State<T> {
       });
     }
 
-    return _persistStates[key] as PersistState<R>;
+    return _persistStates[key]! as PersistState<R>;
   }
 
   /// Initialize all persistent states
   Future<void> initializePersistStates() async {
-    if (_initialized) return;
+    if (_initialized) {
+      return;
+    }
 
     for (final persistState in _persistStates.values) {
       await persistState.initialize();
@@ -54,30 +59,28 @@ mixin PersistStateMixin<T extends StatefulWidget> on State<T> {
 
   /// Get a simple persistent value (creates state if needed)
   R getPersistValue<R>({
-    required String key,
-    required R defaultValue,
-    StorageAdapter? storage,
-    bool autoPersist = true,
-    Duration? debounceTime,
-  }) {
-    return getPersistState<R>(
-      key: key,
-      defaultValue: defaultValue,
-      storage: storage,
-      autoPersist: autoPersist,
-      debounceTime: debounceTime,
-    ).value;
-  }
+    required final String key,
+    required final R defaultValue,
+    final StorageAdapter? storage,
+    final bool autoPersist = true,
+    final Duration? debounceTime,
+  }) => getPersistState<R>(
+    key: key,
+    defaultValue: defaultValue,
+    storage: storage,
+    autoPersist: autoPersist,
+    debounceTime: debounceTime,
+  ).value;
 
   /// Set a persistent value
   Future<void> setPersistValue<R>({
-    required String key,
-    required R value,
-    required R defaultValue,
-    StorageAdapter? storage,
-    bool autoPersist = true,
-    Duration? debounceTime,
-    bool? persist,
+    required final String key,
+    required final R value,
+    required final R defaultValue,
+    final StorageAdapter? storage,
+    final bool autoPersist = true,
+    final Duration? debounceTime,
+    final bool? persist,
   }) async {
     await getPersistState<R>(
       key: key,
@@ -90,13 +93,13 @@ mixin PersistStateMixin<T extends StatefulWidget> on State<T> {
 
   /// Update a persistent value using a function
   Future<void> updatePersistValue<R>({
-    required String key,
-    required R Function(R currentValue) updater,
-    required R defaultValue,
-    StorageAdapter? storage,
-    bool autoPersist = true,
-    Duration? debounceTime,
-    bool? persist,
+    required final String key,
+    required final R Function(R currentValue) updater,
+    required final R defaultValue,
+    final StorageAdapter? storage,
+    final bool autoPersist = true,
+    final Duration? debounceTime,
+    final bool? persist,
   }) async {
     await getPersistState<R>(
       key: key,
@@ -108,14 +111,14 @@ mixin PersistStateMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// Delete a persistent value
-  Future<void> deletePersistValue(String key) async {
+  Future<void> deletePersistValue(final String key) async {
     if (_persistStates.containsKey(key)) {
       await _persistStates[key]!.delete();
     }
   }
 
   /// Reset a persistent value to default
-  Future<void> resetPersistValue(String key) async {
+  Future<void> resetPersistValue(final String key) async {
     if (_persistStates.containsKey(key)) {
       await _persistStates[key]!.reset();
     }
@@ -133,7 +136,7 @@ mixin PersistStateMixin<T extends StatefulWidget> on State<T> {
     super.initState();
     // Initialize persistent states after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      initializePersistStates();
+      unawaited(initializePersistStates());
     });
   }
 

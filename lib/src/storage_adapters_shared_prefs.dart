@@ -1,49 +1,49 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Implementation of FileStorageAdapter using SharedPreferences for WASM compatibility
+/// Implementation of FileStorageAdapter using SharedPreferences for WASM
+/// compatibility
 class FileStorageAdapterImpl {
+  FileStorageAdapterImpl._(this._namespace);
+
   late SharedPreferences _prefs;
   final String _namespace;
 
-  FileStorageAdapterImpl._(this._namespace);
-
-  static Future<FileStorageAdapterImpl> create(
-      [String namespace = 'persist_state']) async {
-    final adapter = FileStorageAdapterImpl._(namespace);
-    adapter._prefs = await SharedPreferences.getInstance();
+  static Future<FileStorageAdapterImpl> create([
+    final String namespace = 'persist_state',
+  ]) async {
+    final adapter = FileStorageAdapterImpl._(namespace)
+      .._prefs = await SharedPreferences.getInstance();
     return adapter;
   }
 
-  String _getKey(String key) {
-    return '${_namespace}_$key';
-  }
+  String _getKey(final String key) => '${_namespace}_$key';
 
-  Future<void> save(String key, dynamic value) async {
+  Future<void> save(final String key, final Object? value) async {
     final storageKey = _getKey(key);
     final jsonString = jsonEncode(value);
     await _prefs.setString(storageKey, jsonString);
   }
 
-  Future<dynamic> load(String key) async {
+  Future<dynamic> load(final String key) async {
     final storageKey = _getKey(key);
     final jsonString = _prefs.getString(storageKey);
     if (jsonString != null) {
       try {
         return jsonDecode(jsonString);
-      } catch (e) {
+      } on Object {
         return null;
       }
     }
     return null;
   }
 
-  Future<void> delete(String key) async {
+  Future<void> delete(final String key) async {
     final storageKey = _getKey(key);
     await _prefs.remove(storageKey);
   }
 
-  Future<bool> containsKey(String key) async {
+  Future<bool> containsKey(final String key) async {
     final storageKey = _getKey(key);
     return _prefs.containsKey(storageKey);
   }

@@ -1,24 +1,34 @@
 name: flutter_persist_state
 description: A lightweight state management solution with automatic persistence to local storage
-version: 0.0.3
+version: 0.1.0
 homepage: https://pub.dev/packages/flutter_persist_state
 repository: https://github.com/Dhia-Bechattaoui/flutter_persist_state
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
-  flutter: ">=3.10.0"
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: ">=3.32.0"
+
+topics:
+  - flutter
+  - state-management
+  - persistence
+  - storage
+  - local-storage
+
+funding:
+  - https://github.com/sponsors/Dhia-Bechattaoui
 
 dependencies:
   flutter:
     sdk: flutter
+  path_provider: ^2.0.0
   shared_preferences: ^2.0.0
   web: ^1.0.0
-  path_provider: ^2.0.0
 
 dev_dependencies:
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

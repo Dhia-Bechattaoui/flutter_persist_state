@@ -1,34 +1,35 @@
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Conditional imports for platform-specific code
-import 'package:flutter_persist_state/src/storage_adapters_shared_prefs.dart'
-    if (dart.library.io) 'package:flutter_persist_state/src/storage_adapters_io.dart'
-    if (dart.library.html) 'package:flutter_persist_state/src/storage_adapters_web.dart';
+import 'storage_adapters_shared_prefs.dart'
+    if (dart.library.io) 'storage_adapters_io.dart'
+    if (dart.library.html) 'storage_adapters_web.dart';
 
 /// Abstract class for storage adapters
 abstract class StorageAdapter {
-  Future<void> save(String key, dynamic value);
-  Future<dynamic> load(String key);
-  Future<void> delete(String key);
-  Future<bool> containsKey(String key);
+  Future<void> save(final String key, final Object? value);
+  Future<dynamic> load(final String key);
+  Future<void> delete(final String key);
+  Future<bool> containsKey(final String key);
   Future<void> clear();
 }
 
 /// SharedPreferences storage adapter
 class SharedPreferencesAdapter implements StorageAdapter {
-  late SharedPreferences _prefs;
-
   SharedPreferencesAdapter._();
 
+  late SharedPreferences _prefs;
+
   static Future<SharedPreferencesAdapter> create() async {
-    final adapter = SharedPreferencesAdapter._();
-    adapter._prefs = await SharedPreferences.getInstance();
+    final adapter = SharedPreferencesAdapter._()
+      .._prefs = await SharedPreferences.getInstance();
     return adapter;
   }
 
   @override
-  Future<void> save(String key, dynamic value) async {
+  Future<void> save(final String key, final Object? value) async {
     if (value is String) {
       await _prefs.setString(key, value);
     } else if (value is int) {
@@ -46,14 +47,14 @@ class SharedPreferencesAdapter implements StorageAdapter {
   }
 
   @override
-  Future<dynamic> load(String key) async {
+  Future<dynamic> load(final String key) async {
     if (_prefs.containsKey(key)) {
       final value = _prefs.get(key);
       if (value is String) {
         try {
           // Try to deserialize JSON
           return jsonDecode(value);
-        } catch (e) {
+        } on Object {
           // Return as plain string if not JSON
           return value;
         }
@@ -64,14 +65,12 @@ class SharedPreferencesAdapter implements StorageAdapter {
   }
 
   @override
-  Future<void> delete(String key) async {
+  Future<void> delete(final String key) async {
     await _prefs.remove(key);
   }
 
   @override
-  Future<bool> containsKey(String key) async {
-    return _prefs.containsKey(key);
-  }
+  Future<bool> containsKey(final String key) async => _prefs.containsKey(key);
 
   @override
   Future<void> clear() async {
@@ -81,38 +80,41 @@ class SharedPreferencesAdapter implements StorageAdapter {
 
 /// File-based storage adapter for larger data (non-web platforms)
 class FileStorageAdapter implements StorageAdapter {
-  final FileStorageAdapterImpl _impl;
-
   FileStorageAdapter._(this._impl);
 
-  static Future<FileStorageAdapter> create(
-      [String namespace = 'persist_state']) async {
+  final FileStorageAdapterImpl _impl;
+
+  /// Creates a new FileStorageAdapter instance
+  ///
+  /// [namespace] - Namespace for file storage (defaults to 'persist_state')
+  static Future<FileStorageAdapter> create([
+    final String namespace = 'persist_state',
+  ]) async {
     final impl = await FileStorageAdapterImpl.create(namespace);
     return FileStorageAdapter._(impl);
   }
 
   @override
-  Future<void> save(String key, dynamic value) async {
-    return _impl.save(key, value);
-  }
+  Future<void> save(final String key, final Object? value) async =>
+      _impl.save(key, value);
 
   @override
-  Future<dynamic> load(String key) async {
-    return _impl.load(key);
-  }
+  Future<dynamic> load(final String key) async => _impl.load(key);
 
+  /// Delete a value from storage
+  ///
+  /// [key] - The key to delete
   @override
-  Future<void> delete(String key) async {
-    return _impl.delete(key);
-  }
+  Future<void> delete(final String key) async => _impl.delete(key);
 
+  /// Check if a key exists in storage
+  ///
+  /// [key] - The key to check
+  /// Returns true if the key exists, false otherwise
   @override
-  Future<bool> containsKey(String key) async {
-    return _impl.containsKey(key);
-  }
+  Future<bool> containsKey(final String key) async => _impl.containsKey(key);
 
+  /// Clear all values from storage
   @override
-  Future<void> clear() async {
-    return _impl.clear();
-  }
+  Future<void> clear() async => _impl.clear();
 }

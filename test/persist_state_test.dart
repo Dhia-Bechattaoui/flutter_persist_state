@@ -1,29 +1,25 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_persist_state/flutter_persist_state.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // Mock storage adapter for testing
 class MockStorageAdapter implements StorageAdapter {
   final Map<String, dynamic> _storage = {};
 
   @override
-  Future<void> save(String key, dynamic value) async {
+  Future<void> save(final String key, final Object? value) async {
     _storage[key] = value;
   }
 
   @override
-  Future<dynamic> load(String key) async {
-    return _storage[key];
-  }
+  Future<dynamic> load(final String key) async => _storage[key];
 
   @override
-  Future<void> delete(String key) async {
+  Future<void> delete(final String key) async {
     _storage.remove(key);
   }
 
   @override
-  Future<bool> containsKey(String key) async {
-    return _storage.containsKey(key);
-  }
+  Future<bool> containsKey(final String key) async => _storage.containsKey(key);
 
   @override
   Future<void> clear() async {
@@ -91,7 +87,7 @@ void main() {
         storage: mockStorage,
       );
 
-      await state.update((value) => value + 10);
+      await state.update((final value) => value + 10);
       expect(state.value, equals(52));
     });
 
@@ -100,13 +96,12 @@ void main() {
         key: 'test',
         defaultValue: 42,
         storage: mockStorage,
-        autoPersist: true,
       );
 
       await state.set(100);
 
       // Wait for debounce
-      await Future.delayed(const Duration(milliseconds: 600));
+      await Future<void>.delayed(const Duration(milliseconds: 600));
 
       final storedValue = await mockStorage.load('test');
       expect(storedValue, equals(100));
@@ -123,7 +118,7 @@ void main() {
       await state.set(100);
 
       // Wait for debounce
-      await Future.delayed(const Duration(milliseconds: 600));
+      await Future<void>.delayed(const Duration(milliseconds: 600));
 
       final storedValue = await mockStorage.load('test');
       expect(storedValue, isNull);

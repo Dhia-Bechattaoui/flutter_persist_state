@@ -1,19 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_persist_state/src/persist_state.dart';
-import 'package:flutter_persist_state/src/storage_adapters.dart';
+
+import 'persist_state.dart';
+import 'storage_adapters.dart';
 
 /// A widget that provides persistent state management to its children
 class PersistStateWidget extends StatefulWidget {
-  final Widget child;
-  final Map<String, PersistState> states;
-  final StorageAdapter? defaultStorage;
-
   const PersistStateWidget({
-    super.key,
     required this.child,
     required this.states,
+    super.key,
     this.defaultStorage,
   });
+
+  final Widget child;
+  final Map<String, PersistState<dynamic>> states;
+  final StorageAdapter? defaultStorage;
 
   @override
   State<PersistStateWidget> createState() => _PersistStateWidgetState();
@@ -25,7 +28,7 @@ class _PersistStateWidgetState extends State<PersistStateWidget> {
   @override
   void initState() {
     super.initState();
-    _initializeStates();
+    unawaited(_initializeStates());
   }
 
   Future<void> _initializeStates() async {
@@ -40,13 +43,9 @@ class _PersistStateWidgetState extends State<PersistStateWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (!_initialized) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return _PersistStateInheritedWidget(
@@ -67,31 +66,27 @@ class _PersistStateWidgetState extends State<PersistStateWidget> {
 
 /// Inherited widget that provides access to persistent states
 class _PersistStateInheritedWidget extends InheritedWidget {
-  final Map<String, PersistState> states;
-  final StorageAdapter? defaultStorage;
-
   const _PersistStateInheritedWidget({
     required this.states,
-    this.defaultStorage,
     required super.child,
+    this.defaultStorage,
   });
 
-  @override
-  bool updateShouldNotify(_PersistStateInheritedWidget oldWidget) {
-    return states != oldWidget.states ||
-        defaultStorage != oldWidget.defaultStorage;
-  }
+  final Map<String, PersistState<dynamic>> states;
+  final StorageAdapter? defaultStorage;
 
-  static _PersistStateInheritedWidget? of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_PersistStateInheritedWidget>();
-  }
+  @override
+  bool updateShouldNotify(final _PersistStateInheritedWidget oldWidget) =>
+      states != oldWidget.states || defaultStorage != oldWidget.defaultStorage;
+
+  static _PersistStateInheritedWidget? of(final BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<_PersistStateInheritedWidget>();
 }
 
 /// Extension to easily access persistent states from context
 extension PersistStateContext on BuildContext {
   /// Get a persistent state by key
-  PersistState<T>? getPersistState<T>(String key) {
+  PersistState<T>? getPersistState<T>(final String key) {
     final inherited = _PersistStateInheritedWidget.of(this);
     if (inherited != null && inherited.states.containsKey(key)) {
       return inherited.states[key] as PersistState<T>?;
@@ -100,7 +95,7 @@ extension PersistStateContext on BuildContext {
   }
 
   /// Get all available persistent states
-  Map<String, PersistState>? getPersistStates() {
+  Map<String, PersistState<dynamic>>? getPersistStates() {
     final inherited = _PersistStateInheritedWidget.of(this);
     return inherited?.states;
   }
@@ -114,23 +109,27 @@ extension PersistStateContext on BuildContext {
 
 /// A simple widget that manages a single persistent state
 class SinglePersistStateWidget<T> extends StatefulWidget {
-  final String stateKey;
-  final T defaultValue;
-  final Widget Function(BuildContext context, T value, Function(T) setValue)
-      builder;
-  final StorageAdapter? storage;
-  final bool autoPersist;
-  final Duration? debounceTime;
-
   const SinglePersistStateWidget({
-    super.key,
     required this.stateKey,
     required this.defaultValue,
     required this.builder,
+    super.key,
     this.storage,
     this.autoPersist = true,
     this.debounceTime,
   });
+
+  final String stateKey;
+  final T defaultValue;
+  final Widget Function(
+    BuildContext context,
+    T value,
+    void Function(T) setValue,
+  )
+  builder;
+  final StorageAdapter? storage;
+  final bool autoPersist;
+  final Duration? debounceTime;
 
   @override
   State<SinglePersistStateWidget<T>> createState() =>
@@ -152,7 +151,7 @@ class _SinglePersistStateWidgetState<T>
       autoPersist: widget.autoPersist,
       debounceTime: widget.debounceTime,
     );
-    _initializeState();
+    unawaited(_initializeState());
   }
 
   Future<void> _initializeState() async {
@@ -165,7 +164,7 @@ class _SinglePersistStateWidgetState<T>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (!_initialized) {
       return const SizedBox.shrink();
     }
@@ -173,13 +172,15 @@ class _SinglePersistStateWidgetState<T>
     return StreamBuilder<T>(
       stream: _state.stream,
       initialData: _state.value,
-      builder: (context, snapshot) {
+      builder: (final context, final snapshot) {
         final data = snapshot.data;
-        if (data == null) return const SizedBox.shrink();
+        if (data == null) {
+          return const SizedBox.shrink();
+        }
         return widget.builder(
           context,
           data,
-          (value) => _state.set(value),
+          (final value) => unawaited(_state.set(value)),
         );
       },
     );

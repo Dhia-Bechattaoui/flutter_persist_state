@@ -1,8 +1,30 @@
 import 'dart:async';
-import 'package:flutter_persist_state/src/storage_adapters.dart';
+
+import 'package:flutter/foundation.dart';
+
+import 'storage_adapters.dart';
 
 /// A lightweight state management solution with automatic persistence
 class PersistState<T> {
+  /// Creates a new PersistState instance
+  ///
+  /// [key] - Unique identifier for this state in storage
+  /// [defaultValue] - Default value if no persisted value exists
+  /// [storage] - Storage adapter to use (defaults to SharedPreferences)
+  /// [autoPersist] - Whether to automatically persist changes
+  /// [debounceTime] - Debounce time for auto-persistence (defaults to 500ms)
+  PersistState({
+    required final String key,
+    required final T defaultValue,
+    final StorageAdapter? storage,
+    final bool autoPersist = true,
+    final Duration? debounceTime,
+  }) : _key = key,
+       _value = defaultValue,
+       _defaultValue = defaultValue,
+       _storage = storage,
+       _autoPersist = autoPersist,
+       _debounceTime = debounceTime ?? const Duration(milliseconds: 500);
   T _value;
   final String _key;
   StorageAdapter? _storage;
@@ -12,26 +34,6 @@ class PersistState<T> {
 
   Timer? _debounceTimer;
   final StreamController<T> _controller = StreamController<T>.broadcast();
-
-  /// Creates a new PersistState instance
-  ///
-  /// [key] - Unique identifier for this state in storage
-  /// [defaultValue] - Default value if no persisted value exists
-  /// [storage] - Storage adapter to use (defaults to SharedPreferences)
-  /// [autoPersist] - Whether to automatically persist changes
-  /// [debounceTime] - Debounce time for auto-persistence (defaults to 500ms)
-  PersistState({
-    required String key,
-    required T defaultValue,
-    StorageAdapter? storage,
-    bool autoPersist = true,
-    Duration? debounceTime,
-  })  : _key = key,
-        _value = defaultValue,
-        _defaultValue = defaultValue,
-        _storage = storage,
-        _autoPersist = autoPersist,
-        _debounceTime = debounceTime ?? const Duration(milliseconds: 500);
 
   /// Current value of the state
   T get value => _value;
@@ -56,7 +58,7 @@ class PersistState<T> {
           _value = _defaultValue;
         }
       }
-    } catch (e) {
+    } on Object {
       // If loading fails, use default value
       _value = _defaultValue;
     }
@@ -66,8 +68,10 @@ class PersistState<T> {
   ///
   /// [newValue] - New value to set
   /// [persist] - Whether to persist this change (overrides autoPersist setting)
-  Future<void> set(T newValue, {bool? persist}) async {
-    if (_value == newValue) return;
+  Future<void> set(final T newValue, {final bool? persist}) async {
+    if (_value == newValue) {
+      return;
+    }
 
     _value = newValue;
     _controller.add(_value);
@@ -75,7 +79,7 @@ class PersistState<T> {
     final shouldPersist = persist ?? _autoPersist;
     if (shouldPersist) {
       _debounceTimer?.cancel();
-      _debounceTimer = Timer(_debounceTime, () => _persist());
+      _debounceTimer = Timer(_debounceTime, _persist);
     }
   }
 
@@ -83,28 +87,33 @@ class PersistState<T> {
   ///
   /// [updater] - Function that takes current value and returns new value
   /// [persist] - Whether to persist this change (overrides autoPersist setting)
-  Future<void> update(T Function(T currentValue) updater,
-      {bool? persist}) async {
+  Future<void> update(
+    final T Function(T currentValue) updater, {
+    final bool? persist,
+  }) async {
     final newValue = updater(_value);
     await set(newValue, persist: persist);
   }
 
   /// Manually persist the current value to storage
   Future<void> persist() async {
-    if (_storage == null) return;
+    if (_storage == null) {
+      return;
+    }
 
     try {
       await _storage!.save(_key, _value);
-    } catch (e) {
+    } on Object catch (e) {
       // Handle persistence errors
-      // ignore: avoid_print
-      print('Failed to persist state for key $_key: $e');
+      debugPrint('Failed to persist state for key $_key: $e');
     }
   }
 
   /// Load the value from storage
   Future<void> load() async {
-    if (_storage == null) return;
+    if (_storage == null) {
+      return;
+    }
 
     try {
       final storedValue = await _storage!.load(_key);
@@ -118,45 +127,46 @@ class PersistState<T> {
           _value = _defaultValue;
         }
       }
-    } catch (e) {
-      // ignore: avoid_print
-      print('Failed to load state for key $_key: $e');
+    } on Object catch (e) {
+      debugPrint('Failed to load state for key $_key: $e');
     }
   }
 
   /// Delete the persisted value
   Future<void> delete() async {
-    if (_storage == null) return;
+    if (_storage == null) {
+      return;
+    }
 
     try {
       await _storage!.delete(_key);
       _value = _defaultValue;
       _controller.add(_value);
-    } catch (e) {
-      // ignore: avoid_print
-      print('Failed to delete state for key $_key: $e');
+    } on Object catch (e) {
+      debugPrint('Failed to delete state for key $_key: $e');
     }
   }
 
   /// Reset to default value
-  Future<void> reset() async {
-    await set(_defaultValue);
-  }
+  Future<void> reset() async => set(_defaultValue);
 
   /// Check if a value is persisted
   Future<bool> hasPersistedValue() async {
-    if (_storage == null) return false;
-    return await _storage!.containsKey(_key);
+    if (_storage == null) {
+      return false;
+    }
+    return _storage!.containsKey(_key);
   }
 
   /// Dispose of resources
   void dispose() {
     _debounceTimer?.cancel();
-    _controller.close();
+    unawaited(_controller.close());
   }
 
   void _persist() {
-    persist();
+    // Fire and forget - persistence errors are handled in persist()
+    unawaited(persist());
   }
 }
 
@@ -164,17 +174,15 @@ class PersistState<T> {
 extension PersistStateExtension<T> on T {
   /// Create a PersistState instance with this value as default
   PersistState<T> asPersistState({
-    required String key,
-    StorageAdapter? storage,
-    bool autoPersist = true,
-    Duration? debounceTime,
-  }) {
-    return PersistState<T>(
-      key: key,
-      defaultValue: this,
-      storage: storage,
-      autoPersist: autoPersist,
-      debounceTime: debounceTime,
-    );
-  }
+    required final String key,
+    final StorageAdapter? storage,
+    final bool autoPersist = true,
+    final Duration? debounceTime,
+  }) => PersistState<T>(
+    key: key,
+    defaultValue: this,
+    storage: storage,
+    autoPersist: autoPersist,
+    debounceTime: debounceTime,
+  );
 }
